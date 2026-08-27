@@ -248,9 +248,16 @@ trending.
 
 ## 5. The portfolio view: expected loss, and where the tail comes from
 
-Aggregating loan-level probabilities across the 2015–2016 book — 333,721 loans,
-$4.32 billion of exposure — using the standard three-term product (probability of
-default × loss given default × exposure), and recalibrating the probabilities as
+**Which book, and why not all of it.** The portfolio simulated here is the
+**2015–2016 holdout** — 333,721 loans, $4.32 billion — not the full 732,629 from
+section 1. The loan-level probabilities have to come from a model that never saw
+these loans: a loss distribution built on in-sample fitted probabilities is too
+narrow, because the model has already been shown the outcomes it is being asked to
+predict. The counts reconcile exactly — 398,906 training loans plus 333,721 holdout
+loans is the full 732,627 that survives the sub-660 FICO exclusion.
+
+Aggregating those loan-level probabilities using the standard three-term product
+(probability of default × loss given default × exposure), and recalibrating them as
 section 4 argued:
 
 **Modeled expected loss: $322.4M (7.46% of exposure). Actual realised net loss:
@@ -318,6 +325,30 @@ against a downturn rather than trust either number. A cat modeler with a short
 historical event set faces exactly this problem and does exactly this.
 
 ---
+
+## 6. What I'd do next
+
+Four things this study does not do, in the order I'd tackle them:
+
+1. **Stress the tail against a downturn.** The correlation is calibrated on a window
+   containing no recession, so the 1-in-100 is an extrapolation from calm weather.
+   Overlaying the 2007–2009 experience — or a macro scenario — would replace it with
+   something defensible.
+2. **Model loss given default rather than fixing it at 52%.** Severity is stable
+   enough to hold constant across the book, which is what justifies the shortcut
+   here, but it runs 45% in grade A to 66% in grade G. A grade- and term-conditional
+   LGD would sharpen expected loss exactly where the book is worst, and it is the
+   step that moves this from a frequency model to a full expected-loss model.
+3. **Make the default probability macro-conditional.** The model under-predicts out
+   of time by 12%, and section 4 patches that with a single recalibration scalar. A
+   time-varying intercept, or unemployment as a cohort-level covariate, would explain
+   the drift structurally instead of absorbing it.
+4. **Build the 60-month book its own triangle.** It is held out of the vintage curves
+   deliberately, to keep loss timing comparable — but it is the structurally riskier
+   half of the portfolio and it deserves the analysis rather than the exclusion.
+
+The first two matter most. Everything in section 5 above the mean is an assumption
+about correlation, and everything below it assumes severity is a constant.
 
 ## What this demonstrates
 

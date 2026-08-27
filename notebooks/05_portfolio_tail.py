@@ -35,6 +35,29 @@
 # because the loans are correlated.** Take the correlation away and the tail
 # disappears. That is exactly why a cat portfolio is dangerous and a portfolio of
 # 330,000 independent coin flips is not.
+#
+# ### Which book this simulates, and why not all of it
+#
+# Notebook 01 produced 732,629 seasoned, resolved loans. This notebook simulates
+# **333,721 of them** — the 2015–2016 holdout from notebook 04's out-of-time split.
+# That is deliberate rather than a leftover filter:
+#
+# > The loan-level probabilities have to come from a model that **never saw these
+# > loans**. A loss distribution built on in-sample fitted probabilities is too
+# > narrow, because the model has already been shown the outcomes it is being asked
+# > to predict — the dispersion you would measure is partly the model remembering,
+# > not the portfolio varying.
+#
+# The counts reconcile exactly, and it is worth being able to say so out loud:
+#
+# | Stage | Loans |
+# |---|---:|
+# | Seasoned + resolved (notebook 01) | 732,629 |
+# | less sub-660 FICO policy exceptions | −2 |
+# | **Training set** — vintages ≤ 2014 | 398,906 |
+# | **Holdout** — vintages 2015–2016 → *simulated below* | 333,721 |
+#
+# `398,906 + 333,721 = 732,627`.
 
 # %%
 import sys

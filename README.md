@@ -54,11 +54,17 @@ choice, and that is a modeling judgement rather than a limitation.
 
 **4. The portfolio's tail is made entirely of correlation.**
 
-Simulate 333,721 loans defaulting independently and the loss distribution collapses
-to a spike — standard deviation $1.5M on a $322M expected loss. Add a single
-systematic factor at the Basel retail correlation and the standard deviation becomes
-$86.4M, with a 1-in-100 loss of $558M. Same loans, same expected loss, entirely
-different risk.
+The tail simulation runs on the **2015–2016 holdout book** — 333,721 loans, $4.32B —
+rather than the full 732,629. That is deliberate: the loan-level probabilities come
+from a model that never saw these vintages, and a loss distribution built on
+in-sample fitted probabilities understates its own dispersion, because the model has
+already been shown the answers. (See [the reconciliation](#how-the-loan-counts-reconcile) below.)
+
+Simulate those loans defaulting independently and the distribution collapses to a
+spike — standard deviation $1.5M on a $322M expected loss. Add a single systematic
+factor at the Basel retail correlation and the standard deviation becomes $86.4M,
+with a 1-in-100 loss of $558M. Same loans, same expected loss, entirely different
+risk.
 
 ![Loss distribution](figures/05_loss_distribution.png)
 
@@ -76,6 +82,24 @@ credit committee and a reinsurance underwriting meeting equally.
 | [`03_segmentation`](notebooks/03_segmentation.ipynb) | Loss by FICO band and loan grade, split into frequency and severity. Pricing adequacy. Mix-vs-quality decomposition. |
 | [`04_default_model`](notebooks/04_default_model.ipynb) | Logistic regression on origination-time features, interpreted coefficient by coefficient. Out-of-time validation, calibration, decile lift. LightGBM as a benchmark. |
 | [`05_portfolio_tail`](notebooks/05_portfolio_tail.ipynb) | Portfolio expected loss, Vasicek single-factor simulation, EP curve, return-period table, correlation sensitivity. |
+
+### How the loan counts reconcile
+
+Different sections quote different loan counts. Every step is a deliberate filter,
+and they add up exactly:
+
+| Stage | Loans | Why the count changes |
+|---|---:|---|
+| Raw file | 2,260,701 | — |
+| Resolved outcome only | 1,345,350 | Current / Late / In Grace Period have no outcome, so no label |
+| Fully seasoned | **732,629** | Full contractual term elapsed before the March 2019 snapshot |
+| ↳ minus sub-660 FICO | 732,627 | 2 policy exceptions; a segment built on two loans is noise |
+| ↳ **train** — vintages ≤ 2014 | 398,906 | Where the default model is *fit* |
+| ↳ **holdout** — vintages 2015–2016 | **333,721** | Where the model is *scored* — and the book notebook 05 simulates |
+
+`398,906 + 333,721 = 732,627`. The split is by origination year rather than at
+random, because the job is to underwrite loans that have not been written yet — see
+notebook 04.
 
 ### On leakage
 
@@ -150,3 +174,19 @@ directory layout.
 Deliberately excluded, and worth saying so: no deep learning, no stacked ensembles,
 no feature that cannot be explained in one sentence. The point of this study is a
 loss model whose every choice is defensible out loud — not a leaderboard score.
+
+## What I'd do next
+
+The four things this study does not do, in the order I'd tackle them:
+
+1. **Stress the tail against a downturn.** The correlation is calibrated on
+   2012–2015 — a window with no recession in it. Overlaying the 2007–2009 experience
+   would replace an extrapolation with a scenario.
+2. **Model LGD instead of holding it at 52%.** Severity is stable enough to fix
+   across the whole book, but it runs 45% to 66% across the grade scale — so a
+   grade- and term-conditional LGD would sharpen expected loss where it is worst.
+3. **Make PD macro-conditional.** The model under-predicts out of time by 12%; a
+   time-varying intercept would explain that structurally rather than patching it
+   with a recalibration scalar.
+4. **Give the 60-month book its own triangle.** It is excluded here to keep the
+   vintage curves comparable, and it is the structurally riskier half.
