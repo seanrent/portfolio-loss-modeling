@@ -1,0 +1,27 @@
+# ---------------------------------------------------------------------------
+# Raw and processed data are NEVER committed.
+#
+# Two reasons, both worth saying out loud:
+#   1. The raw LendingClub file is ~1.7 GB -- it does not belong in git.
+#   2. Redistribution of the raw dataset is the mirror's business, not ours.
+#
+# data/README.md explains exactly where to get the file and where to put it,
+# so the repo stays reproducible without shipping the data.
+# ---------------------------------------------------------------------------
+data/raw/
+data/processed/
+*.csv
+*.parquet
+!data/README.md
+
+# Notebook / Python cruft
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# OS cruft
+.DS_Store
+Thumbs.db
