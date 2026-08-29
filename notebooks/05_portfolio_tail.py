@@ -40,7 +40,7 @@
 #
 # Notebook 01 produced 732,629 seasoned, resolved loans. This notebook simulates
 # **333,721 of them** — the 2015–2016 holdout from notebook 04's out-of-time split.
-# That is deliberate rather than a leftover filter:
+# That subset is chosen deliberately, for a specific reason:
 #
 # > The loan-level probabilities have to come from a model that **never saw these
 # > loans**. A loss distribution built on in-sample fitted probabilities is too
@@ -529,10 +529,10 @@ sens
 # %% [markdown]
 # ## Step 7 — Sanity check against what actually happened
 #
-# A simulation that has not been checked against reality is decoration. We have
-# eleven years of realised vintage outcomes from notebook 02: does the model's
-# implied year-to-year dispersion look anything like the dispersion actually
-# observed between origination cohorts?
+# A simulation is only worth trusting once it has been checked against reality.
+# Notebook 02 gives us four fully-developed vintage outcomes (2012-2015): does the
+# model's implied year-to-year dispersion resemble the dispersion actually observed
+# between those origination cohorts?
 
 # %%
 panel = pd.read_parquet(dp.VINTAGE_PANEL)

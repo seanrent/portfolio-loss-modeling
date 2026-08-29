@@ -3,12 +3,12 @@
 **A risk analyst's loss study on 2.26 million real consumer loans: vintage curves, a
 default-probability model, and a portfolio tail view.**
 
-Credit risk and catastrophe risk are the same intellectual move performed on
-different exposures. You take a portfolio of correlated risks, model the
-distribution of loss, and reason about the tail. The vocabulary diverges — a credit
-team says *vintage curve* where a reinsurance team says *loss development triangle*,
-*expected loss* where an ILS investor says *AAL*, and *loss distribution* where a
-cat modeler says *EP curve* — but the machinery underneath is one thing.
+Credit risk and catastrophe risk apply the same analysis to different exposures:
+take a portfolio of correlated risks, model the distribution of loss, and reason
+about the tail. The vocabulary diverges (a credit team says *vintage curve* where a
+reinsurance team says *loss development triangle*, *expected loss* where an ILS
+investor says *AAL*, *loss distribution* where a cat modeler says *EP curve*) but
+the underlying machinery is the same.
 
 This study is built on consumer credit data and framed around portfolio loss, so it
 reads as relevant on either side of that bridge.
@@ -190,3 +190,9 @@ The four things this study does not do, in the order I'd tackle them:
    with a recalibration scalar.
 4. **Give the 60-month book its own triangle.** It is excluded here to keep the
    vintage curves comparable, and it is the structurally riskier half.
+
+---
+
+## License
+
+Released under the MIT License — see [LICENSE](LICENSE).

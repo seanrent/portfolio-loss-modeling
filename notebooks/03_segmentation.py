@@ -48,7 +48,7 @@ df = pd.read_parquet(dp.PROCESSED)
 
 # LendingClub's own policy floor was a 660 FICO, so the "<660" bucket contains a
 # literal handful of exceptions. Drop it rather than plot a segment built on two
-# loans -- a rate computed on a couple of observations is noise in a costume.
+# loans; a rate computed on a couple of observations carries no real information.
 df = df[df["fico_band"] != "<660"].copy()
 df["fico_band"] = df["fico_band"].cat.remove_unused_categories()
 
@@ -240,8 +240,7 @@ pivot_loss = df.pivot_table(
     values="funded_amnt", aggfunc="sum", observed=True,
 )
 
-# Suppress thin cells: a loss rate computed on a handful of loans is noise
-# wearing the costume of a number.
+# Suppress thin cells: a loss rate computed on a handful of loans is just noise.
 counts = df.pivot_table(
     index="fico_band", columns="grade", values="charged_off",
     aggfunc="size", observed=True,

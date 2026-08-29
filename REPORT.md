@@ -6,14 +6,15 @@
 
 ## Why this study is shaped the way it is
 
-Take a portfolio of correlated risks. Model the distribution of loss it can produce.
-Reason about the tail, and decide what to charge and what to hold against it.
+Take a portfolio of correlated risks, model the distribution of loss it can
+produce, then reason about the tail and decide what to charge and what to hold
+against it.
 
 That description fits a consumer loan book and a property catastrophe treaty
 equally well. The vocabulary is what diverges: a credit team's **vintage curve** is a
 reinsurance team's **loss development triangle**; **expected loss** on a book is an
 ILS investor's **AAL**; a **loss distribution** becomes an **EP curve** when you plot
-it upside down. Underneath, one set of machinery.
+it upside down. The underlying machinery is the same.
 
 This study runs that machinery end to end on real loan-level data — 2.26 million
 LendingClub loans originated between 2007 and 2018 — and is framed around portfolio
@@ -59,13 +60,13 @@ through it. Thirty-eight columns were excluded in three named groups:
 How badly does this matter? `debt_settlement_flag` is set for borrowers who
 negotiated a settlement, which happens after they stop paying. In the raw file it
 implies charge-off **100% of the time**. A model handed that column reports a near
-perfect AUC and has learned nothing about credit. Excluding these fields — and saying
-which and why — is the difference between a loss study and an accident.
+perfect AUC and has learned nothing about credit. Excluding these fields, and
+documenting which ones and why, is what keeps this an honest loss study.
 
 One deliberate asymmetry: repayment and recovery amounts are *forbidden as
-predictors* and *required to measure the outcome*. A column can be both, and keeping
-that distinction straight is what lets the study talk in dollars rather than in
-classification labels.
+predictors* and *required to measure the outcome*. A column can serve both roles,
+and keeping that distinction straight is what lets the study report dollar losses
+rather than classification labels.
 
 ---
 
@@ -138,8 +139,8 @@ effort belongs there rather than in recovery and workout.
 
 It is also a genuine difference from the catastrophe side. A property cat book is the
 mirror image — low, lumpy frequency and enormously variable severity, with the whole
-tail living in the severity term. The machinery transfers; the shape of the risk does
-not.
+tail living in the severity term. The methods carry over, but the shape of the risk
+is different.
 
 **Does the price cover the loss?** Converting the annual coupon and cumulative loss
 onto a common footing, gross spread stays positive at every grade and *widens* as
@@ -202,9 +203,9 @@ every one is something a human underwriter would recognise:
   sensible; someone funding a business with unsecured personal credit is taking
   business risk onto a consumer balance sheet.
 
-Nothing has the wrong sign. Nothing needs a footnote. That property — every
-coefficient defensible out loud, without a tool — is what is being bought, and it is
-what a model-risk function and a fair-lending adverse-action requirement both demand.
+Every coefficient has a sensible sign and a plain-English reading. That is what an
+interpretable model buys, and it is what a model-risk review and a fair-lending
+adverse-action requirement both need.
 
 ### The benchmark
 
@@ -231,9 +232,9 @@ reason underwriting teams spend their budget on data rather than on architecture
 On the out-of-time test the model predicts a 13.3% default rate against 14.9%
 actual — **12% too low in relative terms**.
 
-That is not a bug; it is section 2 showing up in the model. The 2015–2016 vintages
-were genuinely worse than the 2007–2014 book at the same observable characteristics,
-and nothing in the feature set could have said so.
+This is the deterioration from section 2 reappearing in the model, not a bug. The
+2015–2016 vintages were genuinely worse than the 2007–2014 book at the same
+observable characteristics, and nothing in the feature set could have said so.
 
 This is why credit models in production are **recalibrated frequently and refit
 rarely**. Rank-ordering is stable and transfers out of time — the decile lift table is
@@ -263,8 +264,8 @@ section 4 argued:
 **Modeled expected loss: $322.4M (7.46% of exposure). Actual realised net loss:
 $322.0M (7.45%).**
 
-That is the AAL. It is also the easy part. A point estimate tells you what to charge;
-it says nothing about what to hold capital against.
+That is the AAL, and it is the straightforward part. A point estimate tells you
+what to charge; it says nothing about what to hold capital against.
 
 ### The tail is made of correlation
 
@@ -354,9 +355,9 @@ about correlation, and everything below it assumes severity is a constant.
 
 Real loan-level data, cleaned with an explicit leakage screen; loss measured in
 dollars and developed by cohort; a default model whose every coefficient can be
-defended out loud, honestly validated out of time and honestly reported as
-miscalibrated; and a portfolio loss distribution whose tail is traced to its actual
-source and stress-tested against the assumption driving it.
+explained in plain language, honestly validated out of time and honestly reported
+as miscalibrated; and a portfolio loss distribution whose tail is traced to its
+actual source and stress-tested against the assumption driving it.
 
 The techniques are the ones a credit risk team uses daily. They are also, under
 different names, the ones a catastrophe and ILS team uses daily — vintage curves are
