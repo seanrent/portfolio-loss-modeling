@@ -228,9 +228,11 @@ CATEGORICAL_FEATURES = [
 # --------------------------------------------------------------------------- #
 
 
-def load_raw(path: Path = RAW_CSV, chunksize: int = 250_000) -> pd.DataFrame:
+def load_raw(
+    path: Path = RAW_CSV, chunksize: int = 250_000, columns: list[str] | None = None
+) -> pd.DataFrame:
     """
-    Read the raw CSV in chunks, keeping only RAW_COLUMNS.
+    Read the raw CSV in chunks, keeping only RAW_COLUMNS (or `columns`, if given).
 
     Chunked because the file is ~1.7 GB across 151 columns and pandas' type
     inference will happily exhaust memory trying to read it in one go. Reading
@@ -246,7 +248,7 @@ def load_raw(path: Path = RAW_CSV, chunksize: int = 250_000) -> pd.DataFrame:
         chunk
         for chunk in pd.read_csv(
             path,
-            usecols=RAW_COLUMNS,
+            usecols=columns or RAW_COLUMNS,
             chunksize=chunksize,
             low_memory=True,
         )
@@ -542,15 +544,18 @@ def vintage_triangle(
     return cumulative
 
 
-def build_clean_table(path: Path = RAW_CSV) -> pd.DataFrame:
+def build_clean_table(path: Path = RAW_CSV, columns: list[str] | None = None) -> pd.DataFrame:
     """
     End-to-end pipeline: raw CSV in, modeling table out.
 
     Deliberately a flat sequence of named steps rather than a class hierarchy or
     an sklearn Pipeline. Someone reading this should be able to see the whole
     cleaning story in eight lines without chasing an abstraction.
+
+    `columns` lets a later notebook carry extra outcome-measurement fields (e.g.
+    interest received, for notebook 06) through the identical cleaning steps.
     """
-    df = load_raw(path)
+    df = load_raw(path, columns=columns)
     df = parse_dates(df)
     df = parse_terms(df)
     df = define_target(df)

@@ -1,7 +1,7 @@
 # Portfolio Loss Modeling — LendingClub
 
 **A risk analyst's loss study on 2.26 million real consumer loans: vintage curves, a
-default-probability model, and a portfolio tail view.**
+default-probability model, a portfolio tail view, and a credit policy simulator.**
 
 Credit risk and catastrophe risk apply the same analysis to different exposures:
 take a portfolio of correlated risks, model the distribution of loss, and reason
@@ -22,8 +22,75 @@ reads as relevant on either side of that bridge.
 | Portfolio expected loss | AAL (average annual loss) | [Notebook 05](notebooks/05_portfolio_tail.ipynb) |
 | Loss distribution / tail | EP curve (exceedance probability) | [Notebook 05](notebooks/05_portfolio_tail.ipynb) |
 | Unexpected loss | Capital requirement above the technical rate | [Notebook 05](notebooks/05_portfolio_tail.ipynb) |
+| Score cutoff and limit assignment | Underwriting appetite and line size | [Notebook 06](notebooks/06_policy_simulator.ipynb) |
 
 **📄 [Read the report](REPORT.md)** — the plain-English narrative, no code required.
+
+---
+
+## Credit Policy Simulator
+
+**Declining the riskiest 5% of applicants and funding the riskiest fifth at 60% of
+the amount they asked for would have cut the 2015–2016 book's loss rate from 745 to
+666 bps, with 5% fewer approvals and 9.6% less exposure.**
+
+[Notebook 06](notebooks/06_policy_simulator.ipynb) replays the two decisions a lender
+actually makes with a score: whether to approve an applicant, and how much to lend
+them. It runs both on the out-of-time book from notebook 04, which the model never
+saw. A cutoff alone works as a score should. Approving the safest 90% takes the loss
+rate from 745 to 665 bps and cuts loss dollars by 18%, and the loss rate falls at
+every 5-point step down to a 50% approval rate.
+
+![Cutoff tradeoff](figures/06_cutoff_tradeoff.png)
+
+| Policy | Approval rate | Funded share of request, by PD quintile (safest → riskiest) | Exposure | Loss rate | Δ approvals | Δ exposure | Δ loss rate | Δ loss $ | Δ interest net of loss |
+|---|---:|---|---:|---:|---:|---:|---:|---:|---:|
+| Approve everyone | 100% | 100% across the board | $4,320M | 745 bps | — | — | — | — | — |
+| Cutoff only | 90% | 100% across the board | $3,952M | 665 bps | −10% | −8.5% | −81 bps | −18.4% | −3.9% |
+| **A. Light (recommended)** | 95% | 100 / 100 / 100 / 100 / 60% | $3,906M | 666 bps | −5% | −9.6% | −79 bps | −19.2% | −5.4% |
+| B. Balanced | 90% | 100 / 95 / 85 / 70 / 60% | $3,366M | 616 bps | −10% | −22.1% | −129 bps | −35.6% | −16.7% |
+| C. Tight | 80% | 100 / 90 / 75 / 60 / 50% | $2,909M | 555 bps | −20% | −32.7% | −190 bps | −49.8% | −26.3% |
+
+**Policy A matches the loss-rate cut of declining 10% of applicants while declining
+only 5%.** The cutoff-only route keeps slightly more margin (interest net of losses
+falls 3.9%, against 5.4% for A), but for a lender that is still growing, keeping about
+16,700 more customers is worth 1.5 points. B and C cut losses further, but each basis
+point of improvement costs about twice as much margin as it does under A.
+
+**The loans a cutoff removes were not losing money.** Even the riskiest 5% paid 1,996
+bps of interest against 1,761 bps of realized loss, netting +235 bps, compared with
++640 bps for the whole book. Both figures are before servicing fees and the cost of
+funds. A tighter policy trades thin, volatile margin for lower losses; it does not cut
+out loss-makers, and the table above shows what that costs.
+
+**How it was measured.**
+
+| | |
+|---|---|
+| Book | Notebook 04's out-of-time test set: 333,721 loans issued January 2015 – February 2016, FICO 660+ |
+| Loans included | Terminal status only (Fully Paid or Charged Off), and the full 36-month term elapsed by the March 2019 snapshot. The 60-month loans from these years had not matured and are excluded. |
+| Score | Notebook 04's logistic model, fit on 2007–2014 vintages using origination-time fields only |
+| Bad | Charged Off, Default, or "Does not meet the credit policy. Status:Charged Off" (none of the last fall in this window) |
+| Realized loss | Funded amount − principal repaid − recoveries, floored at zero. Loss rate is realized loss over funded amount, in bps |
+| Exposure | Funded amount |
+| Limits | Each PD quintile is funded at a fixed share of the amount requested; loss and interest scale with the smaller balance |
+
+The baseline reproduces notebook 05 exactly (14.88% bad rate, $322.0M of realized loss
+on $4.32B). Training and holdout loans share no issue months, and no post-origination
+field is a model input.
+
+**Limitations.**
+
+- **No reject inference.** Only booked loans have outcomes, so the simulator sizes
+  tightening the policy, not loosening it.
+- **Proportional limits.** A capped loan is assumed to default exactly when the full
+  loan did. A smaller payment could lower default risk, and some borrowers would turn
+  down a smaller offer.
+- **One product, one window.** These are 36-month loans from 2015–2016, a period that
+  ran worse than the years before it (finding 1 below). The percentages should travel
+  better than the dollar amounts.
+- **Margin before costs.** "Interest net of loss" ignores servicing fees, the cost of
+  funds and acquisition cost, all of which would make the declined loans look worse.
 
 ---
 
@@ -82,6 +149,7 @@ credit committee and a reinsurance underwriting meeting equally.
 | [`03_segmentation`](notebooks/03_segmentation.ipynb) | Loss by FICO band and loan grade, split into frequency and severity. Pricing adequacy. Mix-vs-quality decomposition. |
 | [`04_default_model`](notebooks/04_default_model.ipynb) | Logistic regression on origination-time features, interpreted coefficient by coefficient. Out-of-time validation, calibration, decile lift. LightGBM as a benchmark. |
 | [`05_portfolio_tail`](notebooks/05_portfolio_tail.ipynb) | Portfolio expected loss, Vasicek single-factor simulation, EP curve, return-period table, correlation sensitivity. |
+| [`06_policy_simulator`](notebooks/06_policy_simulator.ipynb) | Score cutoffs and risk-based limits replayed on the out-of-time book: approval, exposure and loss tradeoffs, and a recommended policy. |
 
 ### How the loan counts reconcile
 
@@ -132,7 +200,7 @@ jupyter lab notebooks/
 
 Run the notebooks in order. `01` does the one slow pass over the raw CSV (~40
 seconds) and writes two Parquet tables that everything downstream reads. Notebooks
-02–05 each run in well under a minute. Every notebook runs top to bottom without
+02–06 each run in well under a minute. Every notebook runs top to bottom without
 manual intervention, and the figures in this README are regenerated by running them.
 
 **Stack:** pandas, scikit-learn, statsmodels, matplotlib, LightGBM. Nothing exotic —
@@ -150,9 +218,11 @@ portfolio-loss-modeling/
 │   ├── 02_vintage_curves.ipynb
 │   ├── 03_segmentation.ipynb
 │   ├── 04_default_model.ipynb
-│   └── 05_portfolio_tail.ipynb
+│   ├── 05_portfolio_tail.ipynb
+│   └── 06_policy_simulator.ipynb
 ├── src/
 │   ├── data_prep.py       # cleaning, target definition, leakage lists, triangle builder
+│   ├── policy.py          # cutoff sweep, limit schedules, policy evaluation
 │   └── plotting.py        # palette and chart helpers
 └── figures/               # exported charts
 ```
