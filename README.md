@@ -245,9 +245,9 @@ Deliberately excluded, and worth saying so: no deep learning, no stacked ensembl
 no feature that cannot be explained in one sentence. The point of this study is a
 loss model whose every choice is defensible out loud — not a leaderboard score.
 
-## What I'd do next
+## Next steps
 
-The four things this study does not do, in the order I'd tackle them:
+The four things this study does not do, in order of priority:
 
 1. **Stress the tail against a downturn.** The correlation is calibrated on
    2012–2015 — a window with no recession in it. Overlaying the 2007–2009 experience
